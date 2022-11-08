@@ -5,3 +5,4 @@
 ### Added
 
 - Changelog file
+- Readme file
