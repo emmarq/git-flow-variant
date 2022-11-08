@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "staging"
+      - "hotfix"
 
   workflow_dispatch:
 
@@ -21,7 +22,7 @@ jobs:
         id: get-version
         uses: PaulHatch/semantic-version@v5.0.0-beta
         with:
-          tag_prefix: "staging/v"
+          tag_prefix: "${{ github.ref_name }}/v"
 
       - name: Inspect version
         run: |
