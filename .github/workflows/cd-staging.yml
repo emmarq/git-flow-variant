@@ -10,7 +10,11 @@ on:
 jobs:
   versioning: 
     runs-on: ubuntu-latest
-    
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      increment: ${{ steps.get-version.outputs.increment }}
+      version_type: ${{ steps.get-version.outputs.version_type }}
+
     steps:
       - name: 'Checkout source code'
         uses: actions/checkout@v2
@@ -38,3 +42,31 @@ jobs:
         run: |
           git tag ${{ steps.get-version.outputs.version_tag }}
           git push origin ${{ steps.get-version.outputs.version_tag }}
+
+  android-ota-update:
+    needs: versioning
+    if: needs.versioning.outputs.version_type == 'patch'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "android ota update"
+
+  ios-ota-update: 
+    needs: versioning
+    if: needs.versioning.outputs.version_type == 'patch'
+    runs-on: macos-latest
+    steps:
+      - run: echo "ios ota update"
+
+  android-store-update: 
+    needs: versioning
+    if: needs.versioning.outputs.version_type != 'patch'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "android store update"
+
+  ios-store-update: 
+    needs: versioning
+    if: needs.versioning.outputs.version_type != 'patch'
+    runs-on: macos-latest
+    steps:
+      - run: echo "ios store update"
