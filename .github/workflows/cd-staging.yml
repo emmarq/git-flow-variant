@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "staging"
+      - "hotfix"
 
   workflow_dispatch:
 
@@ -25,18 +26,14 @@ jobs:
         id: get-version
         uses: PaulHatch/semantic-version@v5.0.0-beta
         with:
-          tag_prefix: "staging/v"
+          tag_prefix: "${{ github.ref_name }}/v"
 
       - name: Inspect version
         run: |
           echo "version: ${{ steps.get-version.outputs.version }}"
-          echo "major: ${{ steps.get-version.outputs.major }}"
-          echo "minor: ${{ steps.get-version.outputs.minor }}"
-          echo "patch: ${{ steps.get-version.outputs.patch }}"
           echo "increment: ${{ steps.get-version.outputs.increment }}"
           echo "version_type: ${{ steps.get-version.outputs.version_type }}"
           echo "version_tag: ${{ steps.get-version.outputs.version_tag }}"
-          echo "authors: ${{ steps.get-version.outputs.authors }}"
 
       - name: Tag version
         run: |
