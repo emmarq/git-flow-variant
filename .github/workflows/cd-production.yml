@@ -37,4 +37,4 @@ jobs:
       - name: Tag version
         run: |
           git tag ${{ steps.get-version.outputs.version_tag }}
-          git push origin v${{ steps.get-version.outputs.version_tag }}
+          git push origin ${{ steps.get-version.outputs.version_tag }}
