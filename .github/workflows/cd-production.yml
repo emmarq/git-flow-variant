@@ -11,7 +11,7 @@ on:
 
 jobs:
   versioning: 
-    if: github.event_name == "push"
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
@@ -46,7 +46,7 @@ jobs:
 
   android-ota-update:
     needs: versioning
-    if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
+    if: github.event_name == 'push' && needs.versioning.outputs.version_type == 'patch'
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -64,7 +64,7 @@ jobs:
   
   ios-ota-update: 
     needs: versioning
-    if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
+    if: github.event_name == 'push' && needs.versioning.outputs.version_type == 'patch'
     runs-on: macos-latest
     steps:
       - run: echo "ios ota update"
@@ -81,7 +81,7 @@ jobs:
           echo "The version code to use is: ${{ env.version_code }}"
 
   android-store-update: 
-    if: github.event_name == "release"
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - run: echo "android store update"
@@ -97,7 +97,7 @@ jobs:
           echo "The version code to use is: ${{ env.version_code }}"
 
   ios-store-update: 
-    if: github.event_name == "release"
+    if: github.event_name == 'release'
     runs-on: macos-latest
     steps:
       - run: echo "ios store update"
