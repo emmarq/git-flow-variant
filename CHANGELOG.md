@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Version code calculcation with offset of 1
+
 ## [0.1.0]
 
 ### Changed
