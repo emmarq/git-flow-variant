@@ -4,13 +4,18 @@ on:
   push:
     branches:
       - "staging"
+      - "hotfix"
 
   workflow_dispatch:
 
 jobs:
   versioning: 
     runs-on: ubuntu-latest
-    
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      increment: ${{ steps.get-version.outputs.increment }}
+      version_type: ${{ steps.get-version.outputs.version_type }}
+
     steps:
       - name: 'Checkout source code'
         uses: actions/checkout@v2
@@ -20,21 +25,84 @@ jobs:
       - name: Git Version
         id: get-version
         uses: PaulHatch/semantic-version@v5.0.0-beta
-        with:
-          tag_prefix: "staging/v"
-
+       
       - name: Inspect version
         run: |
           echo "version: ${{ steps.get-version.outputs.version }}"
-          echo "major: ${{ steps.get-version.outputs.major }}"
-          echo "minor: ${{ steps.get-version.outputs.minor }}"
-          echo "patch: ${{ steps.get-version.outputs.patch }}"
           echo "increment: ${{ steps.get-version.outputs.increment }}"
           echo "version_type: ${{ steps.get-version.outputs.version_type }}"
           echo "version_tag: ${{ steps.get-version.outputs.version_tag }}"
-          echo "authors: ${{ steps.get-version.outputs.authors }}"
 
       - name: Tag version
         run: |
           git tag ${{ steps.get-version.outputs.version_tag }}
           git push origin ${{ steps.get-version.outputs.version_tag }}
+
+
+  android-ota-update:
+    needs: versioning
+    if: needs.versioning.outputs.version_type == 'patch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+     
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+
+  ios-ota-update: 
+    needs: versioning
+    if: needs.versioning.outputs.version_type == 'patch'
+    runs-on: macos-latest
+
+    steps:
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+      
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+
+  android-store-update:
+    needs: versioning
+    if: needs.versioning.outputs.version_type != 'patch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+
+  ios-store-update: 
+    needs: versioning
+    if: needs.versioning.outputs.version_type != 'patch'
+    runs-on: macos-latest
+
+    steps:
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"

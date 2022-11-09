@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.0]
+
+### Changed
+
+- Unify version throughout environments
+
 ## [0.0.1] - 2022-11-08
 
 ### Added

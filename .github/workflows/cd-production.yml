@@ -4,12 +4,19 @@ on:
   push:
     branches:
       - "main"
+  release:
+    types: [released]
 
   workflow_dispatch:
 
 jobs:
   versioning: 
+    if: github.event_name == "push"
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      increment: ${{ steps.get-version.outputs.increment }}
+      version_type: ${{ steps.get-version.outputs.version_type }}
 
     steps:
       - name: 'Checkout source code'
@@ -20,8 +27,6 @@ jobs:
       - name: Git Version
         id: get-version
         uses: PaulHatch/semantic-version@v5.0.0-beta
-        with:
-          tag_prefix: "production/v"
 
       - name: Inspect version
         run: |
@@ -38,3 +43,71 @@ jobs:
         run: |
           git tag ${{ steps.get-version.outputs.version_tag }}
           git push origin ${{ steps.get-version.outputs.version_tag }}
+
+  android-ota-update:
+    needs: versioning
+    if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "android ota update"
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+  
+  ios-ota-update: 
+    needs: versioning
+    if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
+    runs-on: macos-latest
+    steps:
+      - run: echo "ios ota update"
+
+      - name: Set version environment variable
+        run: |
+          echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
+          echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+ 
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+
+  android-store-update: 
+    if: github.event_name == "release"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "android store update"
+      
+      - name: Set version environment variable
+        run: |
+          echo "version_name=$(echo "${{ github.event.release.tag_name }}" | sed 's/production\/v//g')" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+     
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
+
+  ios-store-update: 
+    if: github.event_name == "release"
+    runs-on: macos-latest
+    steps:
+      - run: echo "ios store update"
+      
+      - name: Set version environment variable
+        run: |
+          echo "version_name=$(echo "${{ github.event.release.tag_name }}" | sed 's/production\/v//g')" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+
+      - name: Check version
+        run: |
+          echo "The version name to use is: ${{ env.version_name }}"
+          echo "The version code to use is: ${{ env.version_code }}"
