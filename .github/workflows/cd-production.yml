@@ -49,13 +49,18 @@ jobs:
     if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
     runs-on: ubuntu-latest
     steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - run: |
           echo "android ota update"
       - name: Set version environment variable
         run: |
           echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
           echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
-          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 1" | bc)" >> $GITHUB_ENV
 
       - name: Check version
         run: |
@@ -67,13 +72,18 @@ jobs:
     if: github.event_name == "push" && needs.versioning.outputs.version_type == 'patch'
     runs-on: macos-latest
     steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - run: echo "ios ota update"
 
       - name: Set version environment variable
         run: |
           echo "version_name=${{ needs.versioning.outputs.version }}" >> $GITHUB_ENV
           echo "version_increment=${{ needs.versioning.outputs.increment }}" >> $GITHUB_ENV
-          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 1" | bc)" >> $GITHUB_ENV
  
       - name: Check version
         run: |
@@ -84,12 +94,17 @@ jobs:
     if: github.event_name == "release"
     runs-on: ubuntu-latest
     steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - run: echo "android store update"
       
       - name: Set version environment variable
         run: |
           echo "version_name=$(echo "${{ github.event.release.tag_name }}" | sed 's/production\/v//g')" >> $GITHUB_ENV
-          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 166" | bc)" >> $GITHUB_ENV
+          echo "version_code=$(echo "$(git rev-list --first-parent --count HEAD) - 1" | bc)" >> $GITHUB_ENV
      
       - name: Check version
         run: |
@@ -100,6 +115,11 @@ jobs:
     if: github.event_name == "release"
     runs-on: macos-latest
     steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - run: echo "ios store update"
       
       - name: Set version environment variable
